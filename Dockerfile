@@ -1,8 +1,30 @@
 FROM angr/angr
 
+USER root
+
 RUN apt update \
-	&& \
-	apt install unzip
+	&& apt install -y \
+		unzip \
+		python-six
+
+USER angr
+WORKDIR /home/angr
+
+RUN ~/.virtualenvs/angr/bin/pip install cvc4-solver \
+	&& git clone https://github.com/angr/pysoot.git \
+	&& cd pysoot \
+	&& ~/.virtualenvs/angr/bin/pip install -e . \
+	&& cd .. \
+	&& ~/.virtualenvs/angr/bin/pip uninstall --yes pysmt \
+	&& git clone https://github.com/pysmt/pysmt.git \
+	&& cd pysmt \
+	&& git checkout 6d792db47be5f8734db15848faca9bc6b770085e \
+	&& ~/.virtualenvs/angr/bin/pip install -e . \
+	&& cd .. \
+	&& ~/.virtualenvs/angr/bin/pip uninstall --yes six \
+	&& ~/.virtualenvs/angr/bin/pip install six
+
+USER root
 
 RUN mkdir /home/angr/Android \
 	&& \
